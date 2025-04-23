@@ -306,7 +306,7 @@ def main():
     check_github_status()
     
     # Run each step in sequence
-    fetch_thangs_leaderboard_links()
+    fetch_thangs_pod_links()
     download_thumbnails()
     generate_showcase_html()
     

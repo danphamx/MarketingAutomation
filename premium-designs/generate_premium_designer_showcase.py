@@ -37,57 +37,81 @@ def check_github_status():
             sys.exit(1)
         print()
 
-def fetch_maker_leaderboard_links():
-    """Fetch and extract links from Thangs leaderboard page"""
-    print("🔍 Fetching links from Thangs leaderboard...")
+def fetch_premium_designer_links():
+    """Fetch and extract links from designer pages listed in model_links.txt"""
+    print("🔍 Fetching links from designer pages...")
     
-    url = "https://thangs.com/leaderboard/makes?inTheRunning=popular&range=period"
+    # Read source URLs from links.txt
+    try:
+        with open('links.txt', 'r') as f:
+            source_urls = [line.strip() for line in f if line.strip()]
+    except FileNotFoundError:
+        print("❌ links.txt not found!")
+        sys.exit(1)
+
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
     }
     
-    try:
-        response = requests.get(url, headers=headers)
-        response.raise_for_status()
-        
-        soup = BeautifulSoup(response.text, 'html.parser')
-        links = []
-        
-        for a_tag in soup.find_all('a', href=True):
-            link = {
-                'url': a_tag['href'],
-                'text': a_tag.get_text(strip=True)
-            }
+    all_model_links = []
+    
+    for source_url in source_urls:
+        print(f"Processing: {source_url}")
+        try:
+            response = requests.get(source_url, headers=headers)
+            response.raise_for_status()
             
-            if not link['url'].startswith('http'):
-                if link['url'].startswith('//'):
-                    link['url'] = 'https:' + link['url']
-                elif link['url'].startswith('/'):
-                    link['url'] = 'https://thangs.com' + link['url']
+            soup = BeautifulSoup(response.text, 'html.parser')
+            page_links = []
             
-            if '/3d-model/' in link['url']:
-                links.append(link)
-        
-        print(f"✅ Found {len(links)} model links")
-        
-        date_str = datetime.now().strftime('%Y%m%d')
-        csv_filename = f'thangs_makerleague_links_{date_str}.csv'
-        
-        with open(csv_filename, 'w', newline='', encoding='utf-8') as csvfile:
-            writer = csv.writer(csvfile)
-            writer.writerow(["URL", "Link Text"])
-            for link in links:
-                writer.writerow([link['url'], link['text']])
-        
-        with open('links.txt', 'w', encoding='utf-8') as f:
-            for link in links:
-                f.write(f"{link['url']}\n")
-        
-        return links
-        
-    except Exception as e:
-        print(f"❌ Error fetching links: {e}")
-        sys.exit(1)
+            for a_tag in soup.find_all('a', href=True):
+                link = {
+                    'url': a_tag['href'],
+                    'text': a_tag.get_text(strip=True)
+                }
+                
+                # Clean up the URL
+                if not link['url'].startswith('http'):
+                    if link['url'].startswith('//'):
+                        link['url'] = 'https:' + link['url']
+                    elif link['url'].startswith('/'):
+                        link['url'] = 'https://thangs.com' + link['url']
+                
+                # Only include links that contain '/3d-model/'
+                if '/3d-model/' in link['url']:
+                    page_links.append(link)
+                    
+                # Take only first 3 model links from this page
+                if len(page_links) >= 3:
+                    break
+            
+            all_model_links.extend(page_links)
+            print(f"✅ Found {len(page_links)} model links from {source_url}")
+            
+            # Add a small delay between requests
+            time.sleep(1)
+            
+        except Exception as e:
+            print(f"❌ Error processing {source_url}: {e}")
+            continue
+    
+    print(f"\n✅ Found total of {len(all_model_links)} model links")
+    
+    # Save results to CSV and model_links.txt
+    date_str = datetime.now().strftime('%Y%m%d')
+    csv_filename = f'thangs_premium_designer_links_{date_str}.csv'
+    
+    with open(csv_filename, 'w', newline='', encoding='utf-8') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(["URL", "Link Text"])
+        for link in all_model_links:
+            writer.writerow([link['url'], link['text']])
+    
+    with open('model_links.txt', 'w', encoding='utf-8') as f:
+        for link in all_model_links:
+            f.write(f"{link['url']}\n")
+    
+    return all_model_links
 
 def create_img_folder():
     """Create dated img folder if it doesn't exist"""
@@ -149,13 +173,13 @@ def download_thumbnails():
     
     img_folder = create_img_folder()
     date_str = datetime.now().strftime('%Y%m%d')
-    csv_filename = f'image_links_makerleague_{date_str}.csv'
+    csv_filename = f'image_links_premium_designer_{date_str}.csv'
     
     with open(csv_filename, 'w', newline='') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(['Image Path', 'Original Link'])
     
-    with open('links.txt', 'r') as f:
+    with open('model_links.txt', 'r') as f:
         links = [line.strip() for line in f if line.strip()]
     
     for i, url in enumerate(links, 1):
@@ -197,7 +221,7 @@ def get_github_raw_url(image_path):
         pass
     
     encoded_filename = quote(quote(filename))
-    return f"https://raw.githubusercontent.com/danphamx/MarketingAutomation/refs/heads/main/maker-showcase/img/{directory}/{encoded_filename}"
+    return f"https://raw.githubusercontent.com/danphamx/MarketingAutomation/refs/heads/main/premium-designs/img/{directory}/{encoded_filename}"
 
 def generate_showcase_html():
     """Generate HTML showcase of downloaded models"""
@@ -235,10 +259,10 @@ def generate_showcase_html():
     </tr>
     <tr>
         <td align="center" style="padding-bottom: 20px;">
-            Maker League<br />
+            Premium Designs<br />
             <span style="font-size:18px">
-                <a href="https://thangs.com/leaderboard/makes?inTheRunning=popular&range=period" target="_blank" style="color:#0000FF">
-                    Just for Fun, Support Your Favorite Thangs Designers
+                <a href="https://thangs.com/marketplace/memberships/trending" target="_blank" style="color:#0000FF">
+                    Explore more trending memberships from top designers
                 </a>
             </span>
         </td>
@@ -293,20 +317,20 @@ def generate_showcase_html():
 """
 
     current_date = datetime.now().strftime("%Y%m%d")
-    output_filename = f'html_blob_maker_league_{current_date}.html'
+    output_filename = f'html_blob_premium_designers_{current_date}.html'
     with open(output_filename, 'w') as f:
         f.write(html_content)
     
     print(f"✅ Generated HTML showcase: {output_filename}")
 
 def main():
-    print("🚀 Starting Maker League Generator\n")
+    print("🚀 Starting Premium Designers Generator\n")
     
     # Check GitHub status first
     check_github_status()
     
     # Run each step in sequence
-    fetch_maker_leaderboard_links()
+    fetch_premium_designer_links()
     download_thumbnails()
     generate_showcase_html()
     
