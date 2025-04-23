@@ -223,62 +223,71 @@ def generate_showcase_html():
 <!DOCTYPE html>
 <html>
 <head>
-<style>
-.image-container {
-    width: 300px;
-    height: 400px;
-    display: inline-block;
-    overflow: hidden;
-    position: relative;
-    margin: 10px;
-}
-
-.row {
-    margin-bottom: 20px;
-    text-align: center;
-}
-</style>
 </head>
 <body>
-<div style="text-align: center;">
-    <span style="font-size:19px">What to Print This Weekend</span><br />
-    Explore the latest 3D Printing Trends!<br />
-    &nbsp;
-</div>
-
-<div style="text-align: left;">
-    <p dir="ltr" style="text-align: center;">Designer Showcase<br />
-    <span style="font-size:18px"><a href="https://thangs.com/leaderboard/period?league=All" target="_blank">
-    <span style="color:#0000FF">Explore This Week's Exclusive Releases</span></a></span></p>
-
-    <div style="text-align: center;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="min-width: 100%;">
+    <tr>
+        <td align="center" style="padding: 20px 0;">
+            <span style="font-size:19px">What to Print This Weekend</span><br />
+            Explore the latest 3D Printing Trends!<br />
+            &nbsp;
+        </td>
+    </tr>
+    <tr>
+        <td align="center" style="padding-bottom: 20px;">
+            Designer Showcase<br />
+            <span style="font-size:18px">
+                <a href="https://thangs.com/leaderboard/period?league=All" target="_blank" style="color:#0000FF">
+                    Explore This Week's Exclusive Releases
+                </a>
+            </span>
+        </td>
+    </tr>
+</table>
 """
 
     # Add images in groups of three
     for i in range(0, len(image_data), 3):
-        html_content += '        <div class="row">\n'
+        html_content += """<table width="100%" cellpadding="0" cellspacing="0" border="0" style="min-width: 100%;">
+    <tr>
+        <td align="center">
+            <table cellpadding="10" cellspacing="0" border="0">
+                <tr>"""
         
         # Process up to three images per row
         for j in range(3):
             if i + j < len(image_data):
                 img = image_data[i + j]
                 github_url = get_github_raw_url(img['image_path'])
-                html_content += f"""            <div class="image-container">
-                <a href="{img['original_link']}" target="_blank">
-                    <img src="{github_url}" alt="3D Model Preview" style="width: 300px; height: 400px; object-fit: cover; object-position: center;" />
-                </a>
-            </div>"""
+                html_content += f"""
+                    <td style="vertical-align: top;">
+                        <a href="{img['original_link']}" target="_blank" style="text-decoration: none;">
+                            <img src="{github_url}" alt="3D Model Preview" width="300" height="400" style="display: block; width: 300px; height: 400px; object-fit: cover; object-position: center;" />
+                        </a>
+                    </td>"""
+            else:
+                # Add empty cell to maintain structure
+                html_content += """
+                    <td width="300" style="vertical-align: top;">&nbsp;</td>"""
         
-        html_content += '\n        </div>\n'
+        html_content += """
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+"""
 
-    html_content += """    </div>
-    <p dir="ltr" style="text-align: center;">
-        <br />
-        <a href="https://thangs.com/leaderboard/period?league=All" target="_blank">
-            <span style="font-size:18px">View All Top Models</span>
-        </a>
-    </p>
-</div>
+    html_content += """
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="min-width: 100%;">
+    <tr>
+        <td align="center" style="padding: 20px 0;">
+            <a href="https://thangs.com/leaderboard/period?league=All" target="_blank" style="font-size:18px; text-decoration: none;">
+                View All Top Models
+            </a>
+        </td>
+    </tr>
+</table>
 </body>
 </html>
 """
