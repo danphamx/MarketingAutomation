@@ -37,9 +37,9 @@ def check_github_status():
             sys.exit(1)
         print()
 
-def fetch_thangs_leaderboard_links():
-    """Fetch and extract links from Thangs leaderboard page"""
-    print("🔍 Fetching links from Thangs leaderboard...")
+def fetch_thangs_pod_links():
+    """Fetch and extract links from Thangs POD page"""
+    print("🔍 Fetching links from Thangs POD...")
     
     url = "https://thangs.com/?sort=prints&range=prints&costType=all"
     headers = {
