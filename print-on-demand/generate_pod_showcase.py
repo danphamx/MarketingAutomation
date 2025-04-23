@@ -41,7 +41,7 @@ def fetch_thangs_leaderboard_links():
     """Fetch and extract links from Thangs leaderboard page"""
     print("🔍 Fetching links from Thangs leaderboard...")
     
-    url = "https://thangs.com/leaderboard/period?league=All"
+    url = "https://thangs.com/?sort=prints&range=prints&costType=all"
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
     }
@@ -71,7 +71,7 @@ def fetch_thangs_leaderboard_links():
         print(f"✅ Found {len(links)} model links")
         
         date_str = datetime.now().strftime('%Y%m%d')
-        csv_filename = f'thangs_links_{date_str}.csv'
+        csv_filename = f'thangs_pod_links_{date_str}.csv'
         
         with open(csv_filename, 'w', newline='', encoding='utf-8') as csvfile:
             writer = csv.writer(csvfile)
@@ -149,7 +149,7 @@ def download_thumbnails():
     
     img_folder = create_img_folder()
     date_str = datetime.now().strftime('%Y%m%d')
-    csv_filename = f'image_links_{date_str}.csv'
+    csv_filename = f'image_links_pod_designers_{date_str}.csv'
     
     with open(csv_filename, 'w', newline='') as csvfile:
         writer = csv.writer(csvfile)
@@ -235,10 +235,10 @@ def generate_showcase_html():
     </tr>
     <tr>
         <td align="center" style="padding-bottom: 20px;">
-            Designer Showcase<br />
+            Print On Demand Designers<br />
             <span style="font-size:18px">
-                <a href="https://thangs.com/leaderboard/period?league=All" target="_blank" style="color:#0000FF">
-                    Explore This Week's Exclusive Releases
+                <a href="https://thangs.com/?sort=prints&range=prints&costType=all" target="_blank" style="color:#0000FF">
+                    Shop 3D Prints, Right To Your Door!
                 </a>
             </span>
         </td>
@@ -293,14 +293,14 @@ def generate_showcase_html():
 """
 
     current_date = datetime.now().strftime("%Y%m%d")
-    output_filename = f'html_blob_designer_showcase_{current_date}.html'
+    output_filename = f'html_blob_pod_designers_{current_date}.html'
     with open(output_filename, 'w') as f:
         f.write(html_content)
     
     print(f"✅ Generated HTML showcase: {output_filename}")
 
 def main():
-    print("🚀 Starting Designer Showcase Generator\n")
+    print("🚀 Starting POD Designer Generator\n")
     
     # Check GitHub status first
     check_github_status()
@@ -314,7 +314,7 @@ def main():
     print("\n⚠️  Remember to push your changes to GitHub to make the images accessible!")
     print("Run the following commands:")
     print("  git add .")
-    print("  git commit -m 'Update designer showcase and images'")
+    print("  git commit -m 'Update pod showcase and images'")
     print("  git push origin main")
 
 if __name__ == "__main__":
