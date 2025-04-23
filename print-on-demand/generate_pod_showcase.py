@@ -197,7 +197,7 @@ def get_github_raw_url(image_path):
         pass
     
     encoded_filename = quote(quote(filename))
-    return f"https://raw.githubusercontent.com/danphamx/MarketingAutomation/refs/heads/main/free-models/img/{directory}/{encoded_filename}"
+    return f"https://raw.githubusercontent.com/danphamx/MarketingAutomation/refs/heads/main/print-on-demand/img/{directory}/{encoded_filename}"
 
 def generate_showcase_html():
     """Generate HTML showcase of downloaded models"""
