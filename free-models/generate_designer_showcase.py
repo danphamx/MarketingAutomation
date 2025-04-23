@@ -230,14 +230,7 @@ def generate_showcase_html():
     display: inline-block;
     overflow: hidden;
     position: relative;
-    margin: 0 5px;
-}
-
-.image-container img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center;
+    margin: 10px;
 }
 
 .row {
@@ -261,25 +254,20 @@ def generate_showcase_html():
     <div style="text-align: center;">
 """
 
-    for i in range(0, len(image_data), 2):
+    # Add images in groups of three
+    for i in range(0, len(image_data), 3):
         html_content += '        <div class="row">\n'
         
-        img1 = image_data[i]
-        github_url1 = get_github_raw_url(img1['image_path'])
-        html_content += f"""            <div class="image-container">
-            <a href="{img1['original_link']}" target="_blank">
-                <img src="{github_url1}" alt="3D Model Preview" />
-            </a>
-        </div>"""
-
-        if i + 1 < len(image_data):
-            img2 = image_data[i + 1]
-            github_url2 = get_github_raw_url(img2['image_path'])
-            html_content += f"""<div class="image-container">
-            <a href="{img2['original_link']}" target="_blank">
-                <img src="{github_url2}" alt="3D Model Preview" />
-            </a>
-        </div>"""
+        # Process up to three images per row
+        for j in range(3):
+            if i + j < len(image_data):
+                img = image_data[i + j]
+                github_url = get_github_raw_url(img['image_path'])
+                html_content += f"""            <div class="image-container">
+                <a href="{img['original_link']}" target="_blank">
+                    <img src="{github_url}" alt="3D Model Preview" style="width: 300px; height: 400px; object-fit: cover; object-position: center;" />
+                </a>
+            </div>"""
         
         html_content += '\n        </div>\n'
 
