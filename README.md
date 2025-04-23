@@ -12,6 +12,7 @@ This project automates the process of creating visually appealing newsletters fe
   - POD (Print on Demand) Designer Showcase
 - **HTML Generation**: Creates Mailchimp-compatible HTML for each showcase type
 - **Combined View**: Generates a unified view of all showcases for easy review
+- **No Photoshop Required**: No more pixel pushing or wrangling layers and templates. All image manipulation is automatic.
 
 ## Project Structure
 ```
@@ -74,6 +75,11 @@ The automated solution provides the best balance of cost, efficiency, and contro
 - Python 3.x
 - BeautifulSoup4
 - Requests
+- GitHub Pages (for Hosting Image Files)
+
+## Demo
+- HTML Preview: https://danphamx.github.io/MarketingAutomation/rollup/combined_showcase_20250422.html
+- HTML Raw Source: https://github.com/danphamx/MarketingAutomation/blob/main/rollup/combined_showcase_20250422.html
 
 ## Contributing
 Feel free to submit issues and enhancement requests!
