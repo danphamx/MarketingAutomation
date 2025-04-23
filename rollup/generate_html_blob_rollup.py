@@ -71,7 +71,7 @@ def generate_rollup():
     combined_html = """<!DOCTYPE html>
 <html>
 <head>
-    <title>Combined Thangs Showcase</title>
+    <title>Combined Thangs Newsletter Showcase</title>
     <style>
         .showcase-section {
             margin: 20px 0;
