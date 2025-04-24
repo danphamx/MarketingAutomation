@@ -295,7 +295,7 @@ def get_github_raw_url(image_path):
         # Fallback to simple encoding if there's an error
         encoded_filename = quote(filename, safe='')
     
-    return f"https://raw.githubusercontent.com/danphamx/MarketingAutomation/main/one-off/img/{directory}/{encoded_filename}"
+    return f"https://raw.githubusercontent.com/danphamx/MarketingAutomation/refs/heads/main/one-off/img/{directory}/{encoded_filename}"
 
 def generate_showcase_html():
     """Generate HTML showcase of downloaded models"""
