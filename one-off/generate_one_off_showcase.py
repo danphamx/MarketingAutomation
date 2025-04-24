@@ -194,9 +194,20 @@ def create_img_folder():
 
 def get_model_name_from_url(url):
     """Extract model name from URL for filename"""
-    path = urlparse(url).path
-    model_name = path.split('/')[-1].split('-')[0]
-    return model_name
+    parsed = urlparse(url)
+    path = parsed.path
+    
+    # Get the full model name without the ID at the end
+    parts = path.split('/')
+    if len(parts) >= 2:
+        model_name = parts[-1]
+        # Remove any query parameters or fragments
+        model_name = model_name.split('?')[0]
+        # Include a hash of the full URL to ensure uniqueness
+        unique_id = str(hash(url))[-6:]  # Use last 6 digits of hash
+        return f"{model_name}_{unique_id}"
+    
+    return f"model_{str(hash(url))[-6:]}"
 
 def download_image(image_url, filename):
     """Download image from URL and save it locally"""
