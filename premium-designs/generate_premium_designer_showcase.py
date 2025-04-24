@@ -287,11 +287,14 @@ def get_github_raw_url(image_path):
     filename = os.path.basename(image_path)
     
     try:
+        # First decode the filename in case it's already URL-encoded
         filename = unquote(filename)
+        # Double encode the filename - this is what GitHub expects
+        encoded_filename = quote(quote(filename, safe=''), safe='')
     except:
-        pass
+        # Fallback to simple encoding if there's an error
+        encoded_filename = quote(filename, safe='')
     
-    encoded_filename = quote(quote(filename))
     return f"https://raw.githubusercontent.com/danphamx/MarketingAutomation/refs/heads/main/premium-designs/img/{directory}/{encoded_filename}"
 
 def generate_showcase_html():
@@ -354,9 +357,8 @@ def generate_showcase_html():
         for j in range(3):
             if i + j < len(image_data):
                 img = image_data[i + j]
-                # Convert local image path to GitHub URL
-                github_img_url = img['image_path'].replace('img/', 'premium-designs/img/')
-                github_img_url = f"https://raw.githubusercontent.com/danphamx/MarketingAutomation/refs/heads/main/{github_img_url}"
+                # Use get_github_raw_url to properly encode the image URL
+                github_img_url = get_github_raw_url(img['image_path'])
                 
                 html_content += f"""
                     <td style="vertical-align: top;">
