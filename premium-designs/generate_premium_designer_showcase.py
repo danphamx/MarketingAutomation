@@ -402,20 +402,12 @@ def generate_showcase_html():
 def main():
     print("🚀 Starting Premium Designers Generator\n")
     
-    # Check GitHub status first
-    check_github_status()
-    
     # Run each step in sequence
     fetch_premium_designer_links()
     download_thumbnails()
     generate_showcase_html()
     
     print("\n✨ Process completed successfully!")
-    print("\n⚠️  Remember to push your changes to GitHub to make the images accessible!")
-    print("Run the following commands:")
-    print("  git add .")
-    print("  git commit -m 'Update maker league showcase and images'")
-    print("  git push origin main")
 
 if __name__ == "__main__":
     main() 
