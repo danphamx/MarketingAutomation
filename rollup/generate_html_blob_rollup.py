@@ -3,7 +3,7 @@ import glob
 from datetime import datetime
 from bs4 import BeautifulSoup
 
-def find_html_blobs():
+def find_html_blobs(date_str=None):
     """Find all html_blob_*.html files in the parent and sibling directories"""
     parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     
@@ -26,9 +26,12 @@ def find_html_blobs():
         filename = os.path.basename(file_path)
         # Extract date from filename (assuming format html_blob_*_YYYYMMDD.html)
         try:
-            date_str = filename.split('_')[-1].replace('.html', '')
-            if len(date_str) == 8 and date_str.isdigit():  # Ensure it's a valid YYYYMMDD format
-                date_grouped_files.setdefault(date_str, []).append(file_path)
+            file_date = filename.split('_')[-1].replace('.html', '')
+            if len(file_date) == 8 and file_date.isdigit():  # Ensure it's a valid YYYYMMDD format
+                # If date_str is provided, only include files matching that date
+                if date_str and file_date != date_str:
+                    continue
+                date_grouped_files.setdefault(file_date, []).append(file_path)
         except IndexError:
             continue
     
@@ -71,7 +74,9 @@ def get_github_source_url(file_path):
 
 def generate_rollup():
     """Generate a combined HTML file from all html blobs"""
-    html_files = find_html_blobs()
+    # Use today's date to find HTML blobs
+    today_date = datetime.now().strftime('%Y%m%d')
+    html_files = find_html_blobs(today_date)
     
     if not html_files:
         print("❌ No HTML blob files found!")
@@ -139,7 +144,21 @@ def generate_rollup():
     
     print(f"\n✅ Generated combined showcase: {output_filename}")
 
-if __name__ == "__main__":
+def main():
     print("🔄 Starting HTML Blob Rollup\n")
+    
+    # Generate the combined showcase
     generate_rollup()
+    
     print("\n✨ Process completed successfully!")
+    
+    # Add Git reminder
+    print("\n⚠️  IMPORTANT: Remember to push your changes to GitHub!")
+    print("This ensures all images will be accessible in the newsletter.")
+    print("\nRun these commands:")
+    print("  git add .")
+    print("  git commit -m 'Update newsletter content and images'")
+    print("  git push origin main")
+
+if __name__ == "__main__":
+    main()

@@ -8,35 +8,6 @@ import csv
 from datetime import datetime
 import subprocess
 
-def check_github_status():
-    """Check if there are uncommitted changes that need to be pushed"""
-    try:
-        # Check if we're in a git repository
-        subprocess.run(['git', 'rev-parse', '--is-inside-work-tree'], 
-                     check=True, capture_output=True)
-        
-        # Check for uncommitted changes
-        result = subprocess.run(['git', 'status', '--porcelain'],
-                              check=True, capture_output=True, text=True)
-        
-        if result.stdout.strip():
-            print("\n⚠️  WARNING: You have uncommitted changes in your repository!")
-            print("Please commit and push your changes before proceeding.")
-            print("This ensures your images will be available when generating the showcase.\n")
-            
-            response = input("Do you want to proceed anyway? (y/n): ")
-            if response.lower() != 'y':
-                sys.exit(1)
-            print()
-    except subprocess.CalledProcessError:
-        print("\n⚠️  Note: This directory is not a git repository.")
-        print("If you plan to host images on GitHub, please initialize a repository first.\n")
-        
-        response = input("Do you want to proceed anyway? (y/n): ")
-        if response.lower() != 'y':
-            sys.exit(1)
-        print()
-
 def fetch_thangs_leaderboard_links():
     """Fetch and extract links from Thangs leaderboard page"""
     print("🔍 Fetching links from Thangs leaderboard...")
@@ -302,20 +273,12 @@ def generate_showcase_html():
 def main():
     print("🚀 Starting Designer Showcase Generator\n")
     
-    # Check GitHub status first
-    check_github_status()
-    
     # Run each step in sequence
     fetch_thangs_leaderboard_links()
     download_thumbnails()
     generate_showcase_html()
     
     print("\n✨ Process completed successfully!")
-    print("\n⚠️  Remember to push your changes to GitHub to make the images accessible!")
-    print("Run the following commands:")
-    print("  git add .")
-    print("  git commit -m 'Update designer showcase and images'")
-    print("  git push origin main")
 
 if __name__ == "__main__":
     main() 
