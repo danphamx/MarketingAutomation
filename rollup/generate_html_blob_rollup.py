@@ -54,6 +54,21 @@ def extract_body_content(html_file):
         return body.decode_contents()
     return ""
 
+def get_github_source_url(filename):
+    """Convert local file path to GitHub source URL"""
+    # Using the repository URL from the README demo links
+    base_url = "https://github.com/danphamx/MarketingAutomation/blob/main"
+    
+    # Find which directory the file is in
+    if filename.startswith('html_blob_premium_'):
+        return f"{base_url}/premium-designs/{filename}"
+    elif filename.startswith('html_blob_maker_'):
+        return f"{base_url}/maker-showcase/{filename}"
+    elif filename.startswith('html_blob_pod_'):
+        return f"{base_url}/pod-designs/{filename}"
+    else:
+        return f"{base_url}/designer-showcase/{filename}"
+
 def generate_rollup():
     """Generate a combined HTML file from all html blobs"""
     html_files = find_html_blobs()
@@ -84,6 +99,13 @@ def generate_rollup():
             margin-bottom: 20px;
             border-radius: 5px;
         }
+        .source-link {
+            color: #0366d6;
+            text-decoration: none;
+        }
+        .source-link:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -94,11 +116,12 @@ def generate_rollup():
     # Add each file's content
     for html_file in html_files:
         file_name = os.path.basename(html_file)
+        github_url = get_github_source_url(file_name)
         print(f"Processing: {file_name}")
         
         combined_html += f"""
     <div class="showcase-section">
-        <div class="section-title">Source: {file_name}</div>
+        <div class="section-title">Source: <a href="{github_url}" class="source-link" target="_blank">{file_name}</a></div>
         {extract_body_content(html_file)}
     </div>
 """
