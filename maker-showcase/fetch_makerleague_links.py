@@ -5,7 +5,7 @@ import csv
 from datetime import datetime
 import os
 
-def fetch_thangs_leaderboard_links():
+def fetch_maker_leaderboard_links():
     """
     Fetch and extract links from Thangs leaderboard page
     """
