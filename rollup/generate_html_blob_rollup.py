@@ -59,15 +59,18 @@ def get_github_source_url(filename):
     # Using the repository URL from the README demo links
     base_url = "https://github.com/danphamx/MarketingAutomation/blob/main"
     
-    # Find which directory the file is in
+    # Find which directory the file is in based on the filename prefix
     if filename.startswith('html_blob_premium_'):
         return f"{base_url}/premium-designs/{filename}"
     elif filename.startswith('html_blob_maker_'):
         return f"{base_url}/maker-showcase/{filename}"
     elif filename.startswith('html_blob_pod_'):
-        return f"{base_url}/pod-designs/{filename}"
+        return f"{base_url}/print-on-demand/{filename}"  # Updated to print-on-demand
+    elif filename.startswith('html_blob_designer_'):
+        return f"{base_url}/designer-showcase/{filename}"  # Updated to designer-showcase
     else:
-        return f"{base_url}/designer-showcase/{filename}"
+        # Default case - just append to base URL
+        return f"{base_url}/{filename}"
 
 def generate_rollup():
     """Generate a combined HTML file from all html blobs"""
