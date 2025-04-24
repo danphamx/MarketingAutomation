@@ -2,6 +2,7 @@ import os
 import glob
 from datetime import datetime
 from bs4 import BeautifulSoup
+from urllib.parse import quote, unquote
 
 def find_html_blobs(date_str=None):
     """Find all html_blob_*.html files in the parent and sibling directories"""
@@ -67,10 +68,25 @@ def get_github_source_url(file_path):
     if dir_name:
         # Get just the last directory name from the path
         dir_name = os.path.basename(dir_name)
-        return f"{base_url}/{dir_name}/{os.path.basename(file_path)}"
+        # First decode the filename in case it's already URL-encoded
+        filename = os.path.basename(file_path)
+        try:
+            filename = unquote(filename)
+            # Double encode the filename - this is what GitHub expects
+            encoded_filename = quote(quote(filename, safe=''), safe='')
+        except:
+            # Fallback to simple encoding if there's an error
+            encoded_filename = quote(filename, safe='')
+        return f"{base_url}/{dir_name}/{encoded_filename}"
     else:
         # If no directory (file is in root), just append filename
-        return f"{base_url}/{os.path.basename(file_path)}"
+        filename = os.path.basename(file_path)
+        try:
+            filename = unquote(filename)
+            encoded_filename = quote(quote(filename, safe=''), safe='')
+        except:
+            encoded_filename = quote(filename, safe='')
+        return f"{base_url}/{encoded_filename}"
 
 def generate_rollup():
     """Generate a combined HTML file from all html blobs"""
