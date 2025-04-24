@@ -4,11 +4,38 @@ import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse, quote, unquote
 import time
+from typing import List, Dict, Optional
 import csv
 from datetime import datetime
 import subprocess
+from pathlib import Path
 
-def check_github_status():
+# Constants
+REQUESTS_TIMEOUT = 10  # seconds
+RATE_LIMIT_DELAY = 1  # seconds
+MAX_RETRIES = 3
+USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+
+def validate_url(url: str) -> bool:
+    """
+    Validate if a URL is properly formatted and points to thangs.com or than.gs
+    
+    Args:
+        url: The URL to validate
+        
+    Returns:
+        bool: True if URL is valid, False otherwise
+    """
+    try:
+        parsed = urlparse(url)
+        return all([parsed.scheme, parsed.netloc]) and (
+            'thangs.com' in parsed.netloc or 
+            'than.gs' in parsed.netloc
+        )
+    except Exception:
+        return False
+
+def check_github_status() -> None:
     """Check if there are uncommitted changes that need to be pushed"""
     try:
         # Check if we're in a git repository
@@ -37,81 +64,125 @@ def check_github_status():
             sys.exit(1)
         print()
 
-def fetch_premium_designer_links():
-    """Fetch and extract links from designer pages listed in model_links.txt"""
+def make_request(url: str, headers: Dict[str, str], retry_count: int = 0) -> Optional[requests.Response]:
+    """
+    Make an HTTP request with retry logic and proper error handling
+    
+    Args:
+        url: The URL to request
+        headers: Request headers
+        retry_count: Current retry attempt number
+        
+    Returns:
+        Optional[requests.Response]: Response object if successful, None otherwise
+    """
+    try:
+        response = requests.get(url, headers=headers, timeout=REQUESTS_TIMEOUT)
+        response.raise_for_status()
+        return response
+    except requests.RequestException as e:
+        if retry_count < MAX_RETRIES:
+            print(f"⚠️  Retrying {url} (attempt {retry_count + 1}/{MAX_RETRIES})")
+            time.sleep(RATE_LIMIT_DELAY * (retry_count + 1))
+            return make_request(url, headers, retry_count + 1)
+        print(f"❌ Error requesting {url}: {e}")
+        return None
+
+def fetch_premium_designer_links() -> List[Dict[str, str]]:
+    """
+    Fetch and extract links from designer pages listed in links.txt
+    
+    Returns:
+        List[Dict[str, str]]: List of dictionaries containing URL and text for each model
+    """
     print("🔍 Fetching links from designer pages...")
     
-    # Read source URLs from links.txt
+    # Read and validate source URLs
     try:
-        with open('links.txt', 'r') as f:
-            source_urls = [line.strip() for line in f if line.strip()]
-    except FileNotFoundError:
-        print("❌ links.txt not found!")
+        links_file = Path('links.txt')
+        if not links_file.exists():
+            raise FileNotFoundError("links.txt not found!")
+            
+        source_urls = [line.strip() for line in links_file.read_text().splitlines() if line.strip()]
+        source_urls = [url for url in source_urls if validate_url(url)]
+        
+        if not source_urls:
+            raise ValueError("No valid URLs found in links.txt")
+    except Exception as e:
+        print(f"❌ Error reading links.txt: {e}")
         sys.exit(1)
 
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-    }
-    
+    headers = {'User-Agent': USER_AGENT}
     all_model_links = []
     
     for source_url in source_urls:
         print(f"Processing: {source_url}")
-        try:
-            response = requests.get(source_url, headers=headers)
-            response.raise_for_status()
-            
-            soup = BeautifulSoup(response.text, 'html.parser')
-            page_links = []
-            
-            for a_tag in soup.find_all('a', href=True):
-                link = {
-                    'url': a_tag['href'],
-                    'text': a_tag.get_text(strip=True)
-                }
-                
-                # Clean up the URL
-                if not link['url'].startswith('http'):
-                    if link['url'].startswith('//'):
-                        link['url'] = 'https:' + link['url']
-                    elif link['url'].startswith('/'):
-                        link['url'] = 'https://thangs.com' + link['url']
-                
-                # Only include links that contain '/3d-model/'
-                if '/3d-model/' in link['url']:
-                    page_links.append(link)
-                    
-                # Take only first 3 model links from this page
-                if len(page_links) >= 3:
-                    break
-            
-            all_model_links.extend(page_links)
-            print(f"✅ Found {len(page_links)} model links from {source_url}")
-            
-            # Add a small delay between requests
-            time.sleep(1)
-            
-        except Exception as e:
-            print(f"❌ Error processing {source_url}: {e}")
+        response = make_request(source_url, headers)
+        if not response:
             continue
+            
+        soup = BeautifulSoup(response.text, 'html.parser')
+        page_links = []
+        
+        for a_tag in soup.find_all('a', href=True):
+            link = {
+                'url': a_tag['href'],
+                'text': a_tag.get_text(strip=True)
+            }
+            
+            # Clean up and validate the URL
+            if not link['url'].startswith('http'):
+                if link['url'].startswith('//'):
+                    link['url'] = 'https:' + link['url']
+                elif link['url'].startswith('/'):
+                    link['url'] = 'https://thangs.com' + link['url']
+            
+            if not validate_url(link['url']):
+                continue
+                
+            # Only include links that contain '/3d-model/'
+            if '/3d-model/' in link['url']:
+                page_links.append(link)
+                
+            # Take only first 3 model links from this page
+            if len(page_links) >= 3:
+                break
+        
+        all_model_links.extend(page_links)
+        print(f"✅ Found {len(page_links)} model links from {source_url}")
+        
+        # Rate limiting
+        time.sleep(RATE_LIMIT_DELAY)
     
     print(f"\n✅ Found total of {len(all_model_links)} model links")
     
-    # Save results to CSV and model_links.txt
+    # Save results to files
     date_str = datetime.now().strftime('%Y%m%d')
+    save_links_to_files(all_model_links, date_str)
+    
+    return all_model_links
+
+def save_links_to_files(links: List[Dict[str, str]], date_str: str) -> None:
+    """
+    Save links to CSV and text files
+    
+    Args:
+        links: List of dictionaries containing URL and text for each model
+        date_str: Date string for file naming
+    """
     csv_filename = f'thangs_premium_designer_links_{date_str}.csv'
     
+    # Save to CSV
     with open(csv_filename, 'w', newline='', encoding='utf-8') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(["URL", "Link Text"])
-        for link in all_model_links:
+        for link in links:
             writer.writerow([link['url'], link['text']])
     
+    # Save to text file
     with open('model_links.txt', 'w', encoding='utf-8') as f:
-        for link in all_model_links:
+        for link in links:
             f.write(f"{link['url']}\n")
-    
-    return all_model_links
 
 def create_img_folder():
     """Create dated img folder if it doesn't exist"""
@@ -262,7 +333,7 @@ def generate_showcase_html():
             Premium Designs<br />
             <span style="font-size:18px">
                 <a href="https://thangs.com/marketplace/memberships/trending" target="_blank" style="color:#0000FF">
-                    Explore more trending memberships from top designers
+                    Trending Premium Designers
                 </a>
             </span>
         </td>
@@ -270,9 +341,10 @@ def generate_showcase_html():
 </table>
 """
 
-    # Add images in groups of three
+    # Add model images in groups of three
     for i in range(0, len(image_data), 3):
-        html_content += """<table width="100%" cellpadding="0" cellspacing="0" border="0" style="min-width: 100%;">
+        html_content += """
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="min-width: 100%;">
     <tr>
         <td align="center">
             <table cellpadding="10" cellspacing="0" border="0">
@@ -282,11 +354,14 @@ def generate_showcase_html():
         for j in range(3):
             if i + j < len(image_data):
                 img = image_data[i + j]
-                github_url = get_github_raw_url(img['image_path'])
+                # Convert local image path to GitHub URL
+                github_img_url = img['image_path'].replace('img/', 'premium-designs/img/')
+                github_img_url = f"https://raw.githubusercontent.com/danphamx/MarketingAutomation/refs/heads/main/{github_img_url}"
+                
                 html_content += f"""
                     <td style="vertical-align: top;">
                         <a href="{img['original_link']}" target="_blank" style="text-decoration: none;">
-                            <img src="{github_url}" alt="3D Model Preview" width="300" height="400" style="display: block; width: 300px; height: 400px; object-fit: cover; object-position: center;" />
+                            <img src="{github_img_url}" alt="3D Model Preview" width="300" height="400" style="display: block; width: 300px; height: 400px; object-fit: cover; object-position: center;" />
                         </a>
                     </td>"""
             else:
@@ -299,15 +374,15 @@ def generate_showcase_html():
             </table>
         </td>
     </tr>
-</table>
-"""
+</table>"""
 
+    # Add footer with link to marketplace
     html_content += """
 <table width="100%" cellpadding="0" cellspacing="0" border="0" style="min-width: 100%;">
     <tr>
         <td align="center" style="padding: 20px 0;">
-            <a href="https://thangs.com/leaderboard/period?league=All" target="_blank" style="font-size:18px; text-decoration: none;">
-                View All Top Models
+            <a href="https://thangs.com/marketplace/memberships/trending" target="_blank" style="font-size:18px; text-decoration: none;">
+                View All Premium Models
             </a>
         </td>
     </tr>
@@ -316,9 +391,10 @@ def generate_showcase_html():
 </html>
 """
 
-    current_date = datetime.now().strftime("%Y%m%d")
-    output_filename = f'html_blob_premium_designers_{current_date}.html'
-    with open(output_filename, 'w') as f:
+    date_str = datetime.now().strftime('%Y%m%d')
+    output_filename = f'html_blob_premium_designers_{date_str}.html'
+    
+    with open(output_filename, 'w', encoding='utf-8') as f:
         f.write(html_content)
     
     print(f"✅ Generated HTML showcase: {output_filename}")

@@ -54,23 +54,20 @@ def extract_body_content(html_file):
         return body.decode_contents()
     return ""
 
-def get_github_source_url(filename):
+def get_github_source_url(file_path):
     """Convert local file path to GitHub source URL"""
     # Using the repository URL from the README demo links
     base_url = "https://github.com/danphamx/MarketingAutomation/blob/main"
     
-    # Find which directory the file is in based on the filename prefix
-    if filename.startswith('html_blob_premium_'):
-        return f"{base_url}/premium-designs/{filename}"
-    elif filename.startswith('html_blob_maker_'):
-        return f"{base_url}/maker-showcase/{filename}"
-    elif filename.startswith('html_blob_pod_'):
-        return f"{base_url}/print-on-demand/{filename}"  # Updated to print-on-demand
-    elif filename.startswith('html_blob_designer_'):
-        return f"{base_url}/designer-showcase/{filename}"  # Updated to designer-showcase
+    # Get the actual directory name from the file path
+    dir_name = os.path.dirname(file_path)
+    if dir_name:
+        # Get just the last directory name from the path
+        dir_name = os.path.basename(dir_name)
+        return f"{base_url}/{dir_name}/{os.path.basename(file_path)}"
     else:
-        # Default case - just append to base URL
-        return f"{base_url}/{filename}"
+        # If no directory (file is in root), just append filename
+        return f"{base_url}/{os.path.basename(file_path)}"
 
 def generate_rollup():
     """Generate a combined HTML file from all html blobs"""
@@ -119,7 +116,7 @@ def generate_rollup():
     # Add each file's content
     for html_file in html_files:
         file_name = os.path.basename(html_file)
-        github_url = get_github_source_url(file_name)
+        github_url = get_github_source_url(html_file)  # Now passing the full file path
         print(f"Processing: {file_name}")
         
         combined_html += f"""

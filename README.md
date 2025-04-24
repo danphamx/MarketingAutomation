@@ -59,11 +59,34 @@ Several alternatives were evaluated before developing this automation solution:
 The automated solution provides the best balance of cost, efficiency, and control while freeing up valuable team resources for higher-impact tasks.
 
 ## Usage
+
+### Option 1: Run All Showcases (Recommended)
+1. Make the script executable:
+   ```bash
+   chmod +x generate_newsletter.sh
+   ```
+2. Run the script:
+   ```bash
+   ./generate_newsletter.sh
+   ```
+
+### Option 2: Run Individual Components
 1. Run individual showcase generators:
    ```bash
+   # Premium Designer Showcase
    python premium-designs/generate_premium_designer_showcase.py
-   python maker-showcase/fetch_thangs_links.py
-   # ... other showcase generators
+
+   # Maker League Showcase
+   python maker-showcase/generate_makerleague_showcase.py
+   python maker-showcase/fetch_makerleague_links.py
+
+   # Free Models Showcase
+   python free-models/generate_designer_showcase.py
+   python free-models/fetch_thangs_links.py
+   python free-models/download_thumbnails.py
+
+   # Print on Demand Showcase
+   python print-on-demand/generate_pod_showcase.py
    ```
 2. Combine all showcases:
    ```bash
