@@ -29,7 +29,7 @@ This project automates the process of creating visually appealing newsletters fe
 3. The rollup script (`generate_html_blob_rollup.py`) combines all HTML blobs into a single preview file
 4. The generated HTML can be directly used in Mailchimp for the weekly newsletter
 
-<img src="https://github.com/danphamx/MarketingAutomation/blob/main/Marketing%20Automation%20diagram.png?raw=true">
+<a href="https://raw.githubusercontent.com/danphamx/MarketingAutomation/refs/heads/main/Marketing%20Automation%20diagram.png"><img src="https://github.com/danphamx/MarketingAutomation/blob/main/Marketing%20Automation%20diagram.png?raw=true"></a>
 
 ## Benefits
 - **Time Savings**: Reduces newsletter creation time from hours to minutes
