@@ -201,14 +201,10 @@ def get_model_name_from_url(url):
 def download_image(image_url, filename):
     """Download image from URL and save it locally"""
     try:
-        # Clean up filename by removing special characters and symbols
-        clean_filename = ''.join(c for c in filename if c.isalnum() or c in (' ', '-', '_', '.'))
-        clean_filename = clean_filename.strip()  # Remove leading/trailing spaces
-        
         response = requests.get(image_url, stream=True)
         response.raise_for_status()
         
-        with open(clean_filename, 'wb') as f:
+        with open(filename, 'wb') as f:
             for chunk in response.iter_content(chunk_size=8192):
                 if chunk:
                     f.write(chunk)

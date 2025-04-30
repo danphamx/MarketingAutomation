@@ -3,6 +3,7 @@ import glob
 from datetime import datetime
 from bs4 import BeautifulSoup
 from urllib.parse import quote, unquote
+import re
 
 def find_html_blobs(date_str=None):
     """Find all html_blob_*.html files in the parent and sibling directories"""
@@ -159,53 +160,66 @@ def generate_rollup():
         f.write(combined_html)
     
     print(f"\n✅ Generated combined showcase: {output_filename}")
+    return combined_html
 
 def update_readme_with_latest_link(date_str):
-    """Update README.md with the latest newsletter link"""
-    readme_path = os.path.join('..', 'README.md')
-    combined_showcase_url = f"https://danphamx.github.io/MarketingAutomation/rollup/combined_showcase_{date_str}.html"
+    """Update the README.md with the latest newsletter link"""
+    readme_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "README.md")
     
-    try:
-        with open(readme_path, 'r') as f:
-            content = f.read()
-        
-        # Find the "Links to Newsletters" section
-        section_start = content.find("## Links to Newsletters")
-        if section_start == -1:
-            print("❌ Could not find 'Links to Newsletters' section in README.md")
-            return
-        
-        # Find the end of the section
-        section_end = content.find("##", section_start + 1)
-        if section_end == -1:
-            section_end = len(content)
-        
-        # Create new content with updated link
-        new_section = f"""## Links to Newsletters
-
-- Latest Newsletter Preview: {combined_showcase_url}
-- Previous Newsletters:
-  - [2024-04-22](https://danphamx.github.io/MarketingAutomation/rollup/combined_showcase_20250422.html)
-"""
-        
-        # Replace the section
-        new_content = content[:section_start] + new_section + content[section_end:]
-        
-        with open(readme_path, 'w') as f:
-            f.write(new_content)
-        
-        print(f"✅ Updated README.md with latest newsletter link: {combined_showcase_url}")
-    except Exception as e:
-        print(f"❌ Error updating README.md: {e}")
+    # Read the current README content
+    with open(readme_path, 'r', encoding='utf-8') as f:
+        content = f.read()
+    
+    # Create the new link line
+    new_link = f"- HTML Preview: https://danphamx.github.io/MarketingAutomation/rollup/combined_showcase_{date_str}.html"
+    
+    # Check if the Links to Newsletters section exists
+    if "## Links to Newsletters" in content:
+        # If section exists, update the first link
+        content = re.sub(
+            r'(## Links to Newsletters\n)(.*?)(?=\n\n|\Z)',
+            f'\\1{new_link}',
+            content,
+            flags=re.DOTALL
+        )
+    else:
+        # If section doesn't exist, add it at the end
+        content += f"\n\n## Links to Newsletters\n{new_link}\n"
+    
+    # Write the updated content back to README.md
+    with open(readme_path, 'w', encoding='utf-8') as f:
+        f.write(content)
+    
+    print(f"✅ Updated README.md with latest newsletter link")
 
 def main():
-    print("🔄 Starting HTML Blob Rollup\n")
+    """Main function to generate the rollup"""
+    # Use today's date to find HTML blobs
+    today_date = datetime.now().strftime('%Y%m%d')
+    html_files = find_html_blobs(today_date)
     
-    # Generate the combined showcase
-    generate_rollup()
+    if not html_files:
+        print("❌ No HTML blob files found!")
+        return
     
-    # Update README with latest link
-    update_readme_with_latest_link(datetime.now().strftime('%Y%m%d'))
+    print(f"📝 Found {len(html_files)} HTML blob files")
+    
+    # Create the output directory if it doesn't exist
+    output_dir = os.path.dirname(os.path.abspath(__file__))
+    os.makedirs(output_dir, exist_ok=True)
+    
+    # Generate the combined HTML
+    combined_html = generate_rollup()
+    
+    # Write the combined HTML to a file
+    output_file = os.path.join(output_dir, f"combined_showcase_{today_date}.html")
+    with open(output_file, 'w', encoding='utf-8') as f:
+        f.write(combined_html)
+    
+    print(f"\n✅ Generated combined showcase: {os.path.basename(output_file)}")
+    
+    # Update README.md with the latest link
+    update_readme_with_latest_link(today_date)
     
     print("\n✨ Process completed successfully!")
     
