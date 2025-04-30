@@ -106,5 +106,10 @@ The automated solution provides the best balance of cost, efficiency, and contro
 - HTML Preview: https://danphamx.github.io/MarketingAutomation/rollup/combined_showcase_20250422.html
 - HTML Raw Source: https://github.com/danphamx/MarketingAutomation/blob/main/rollup/combined_showcase_20250422.html
 
+## Links to Newsletters
+
+- Latest Newsletter Preview: https://danphamx.github.io/MarketingAutomation/rollup/combined_showcase_20250430.html
+- Previous Newsletters:
+  - [2024-04-22](https://danphamx.github.io/MarketingAutomation/rollup/combined_showcase_20250422.html)
 ## Contributing
 Feel free to submit issues and enhancement requests!

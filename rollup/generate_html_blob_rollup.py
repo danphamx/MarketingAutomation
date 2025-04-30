@@ -160,11 +160,52 @@ def generate_rollup():
     
     print(f"\n✅ Generated combined showcase: {output_filename}")
 
+def update_readme_with_latest_link(date_str):
+    """Update README.md with the latest newsletter link"""
+    readme_path = os.path.join('..', 'README.md')
+    combined_showcase_url = f"https://danphamx.github.io/MarketingAutomation/rollup/combined_showcase_{date_str}.html"
+    
+    try:
+        with open(readme_path, 'r') as f:
+            content = f.read()
+        
+        # Find the "Links to Newsletters" section
+        section_start = content.find("## Links to Newsletters")
+        if section_start == -1:
+            print("❌ Could not find 'Links to Newsletters' section in README.md")
+            return
+        
+        # Find the end of the section
+        section_end = content.find("##", section_start + 1)
+        if section_end == -1:
+            section_end = len(content)
+        
+        # Create new content with updated link
+        new_section = f"""## Links to Newsletters
+
+- Latest Newsletter Preview: {combined_showcase_url}
+- Previous Newsletters:
+  - [2024-04-22](https://danphamx.github.io/MarketingAutomation/rollup/combined_showcase_20250422.html)
+"""
+        
+        # Replace the section
+        new_content = content[:section_start] + new_section + content[section_end:]
+        
+        with open(readme_path, 'w') as f:
+            f.write(new_content)
+        
+        print(f"✅ Updated README.md with latest newsletter link: {combined_showcase_url}")
+    except Exception as e:
+        print(f"❌ Error updating README.md: {e}")
+
 def main():
     print("🔄 Starting HTML Blob Rollup\n")
     
     # Generate the combined showcase
     generate_rollup()
+    
+    # Update README with latest link
+    update_readme_with_latest_link(datetime.now().strftime('%Y%m%d'))
     
     print("\n✨ Process completed successfully!")
     
