@@ -1,7 +1,7 @@
 # Marketing Automation for Thangs Newsletter
 
 ## Overview
-This project automates the process of creating visually appealing newsletters featuring trending 3D models from Thangs.com. What used to be a manual 1-4 hour weekly process has been transformed into an automated workflow that pulls live data directly from Thangs.com.
+This project automates the process of creating visually appealing newsletters featuring trending 3D models from Thangs.com. What used to be a manual 4-8 hour weekly process has been transformed into an automated workflow that pulls live data directly from Thangs.com.
 
 ## Key Features
 - **Automated Content Generation**: Scripts automatically fetch trending models and designer content from Thangs.com
@@ -105,6 +105,7 @@ The automated solution provides the best balance of cost, efficiency, and contro
 ## Demo
 - HTML Preview: https://danphamx.github.io/MarketingAutomation/rollup/combined_showcase_20250422.html
 - HTML Raw Source: https://github.com/danphamx/MarketingAutomation/blob/main/rollup/combined_showcase_20250422.html
+- <a href="https://raw.githubusercontent.com/danphamx/MarketingAutomation/refs/heads/main/Newsletter%20Example.png"><img src="https://github.com/danphamx/MarketingAutomation/blob/main/Newsletter%20Example.png?raw=true"></a>
 
 ## Links to Newsletters
 - HTML Preview: https://danphamx.github.io/MarketingAutomation/rollup/combined_showcase_20250501.html
